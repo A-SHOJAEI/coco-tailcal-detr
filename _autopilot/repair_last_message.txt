@@ -1,0 +1,17 @@
+`make all` now succeeds end-to-end (smoke mode) and produces `artifacts/results.json` + `artifacts/report.md`.
+
+Changes made:
+
+- `tailcal_detr/model.py`
+  - Replaced the hard dependency on `torchvision.models.detection.detr_resnet50` (not present in torchvision 0.20.1) with a local fallback model `TinyDETR` that implements the same train/infer interface used by the pipeline.
+  - Added `build_model_for_checkpoint(...)` to reconstruct the right module structure when loading TailCal checkpoints that wrap `class_embed` with `LogitAdjustedHead` (fixes strict `state_dict` loading during eval/temperature scaling).
+
+- `tailcal_detr/eval_coco.py`, `tailcal_detr/temperature_scale.py`
+  - Load checkpoints via `build_model_for_checkpoint(...)` and call `torch.load(..., weights_only=False)` explicitly.
+
+- `tailcal_detr/train_tailcal.py`
+  - `torch.load(..., weights_only=False)` explicitly.
+  - Stored TailCal metadata (`logit_adjustment_tau`, etc.) into the saved checkpoint under `ckpt["tailcal"]` for reproducibility.
+
+- `tailcal_detr/__init__.py`, `tailcal_detr/repro.py`
+  - Set `CUBLAS_WORKSPACE_CONFIG=:4096:8` early to prevent CUDA deterministic-mode crashes when `repro.deterministic: true` and `device: auto` selects CUDA.

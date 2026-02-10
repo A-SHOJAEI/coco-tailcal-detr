@@ -1,0 +1,96 @@
+project:
+  name: coco-tailcal-detr
+  mode: smoke
+
+paths:
+  data_root: data
+  artifacts_dir: artifacts
+  runs_dir: runs
+
+smoke_data:
+  root: data/smoke_coco
+  num_train_images: 8
+  num_val_images: 4
+  image_size: [320, 320]
+  num_classes: 3
+  seed: 0
+
+repro:
+  seed: 0
+  deterministic: true
+
+train_baseline:
+  out: runs/baseline_smoke
+  epochs: 1
+  batch_size: 2
+  num_workers: 0
+  lr: 1.0e-4
+  weight_decay: 1.0e-4
+  max_steps_per_epoch: 3
+  device: auto
+
+tailcal:
+  # TailCal stage fine-tunes from the baseline checkpoint.
+  epochs: 1
+  batch_size: 2
+  num_workers: 0
+  lr: 5.0e-5
+  weight_decay: 1.0e-4
+  max_steps_per_epoch: 2
+
+  # Method knobs
+  balanced_sampling: true
+  logit_adjustment: true
+  logit_adjustment_tau: 1.0
+  temperature_scaling: true
+
+  # Freezing controls
+  unfreeze_bbox_head: false
+  unfreeze_last_encoder_block: false
+
+eval:
+  split: val
+  batch_size: 1
+  num_workers: 0
+  score_threshold: 0.05
+  top_k: 50
+
+experiments:
+  - name: baseline
+    kind: baseline
+    out: runs/baseline_smoke
+  - name: tailcal_full
+    kind: tailcal
+    out: runs/tailcal_full_smoke
+    balanced_sampling: true
+    logit_adjustment: true
+    temperature_scaling: true
+    unfreeze_last_encoder_block: false
+  - name: ablate_balanced_only
+    kind: tailcal
+    out: runs/ablate_balanced_only_smoke
+    balanced_sampling: true
+    logit_adjustment: false
+    temperature_scaling: false
+    unfreeze_last_encoder_block: false
+  - name: ablate_logit_only
+    kind: tailcal
+    out: runs/ablate_logit_only_smoke
+    balanced_sampling: false
+    logit_adjustment: true
+    temperature_scaling: false
+    unfreeze_last_encoder_block: false
+  - name: ablate_temp_only
+    kind: tailcal
+    out: runs/ablate_temp_only_smoke
+    balanced_sampling: false
+    logit_adjustment: false
+    temperature_scaling: true
+    unfreeze_last_encoder_block: false
+  - name: ablate_unfreeze_transformer
+    kind: tailcal
+    out: runs/ablate_unfreeze_transformer_smoke
+    balanced_sampling: true
+    logit_adjustment: true
+    temperature_scaling: true
+    unfreeze_last_encoder_block: true

@@ -1,0 +1,93 @@
+project:
+  name: coco-tailcal-detr
+  mode: coco
+
+paths:
+  data_root: data
+  artifacts_dir: artifacts
+  runs_dir: runs
+
+coco:
+  root: data/coco
+  downloads_dir: data/coco/downloads
+  urls:
+    - http://images.cocodataset.org/zips/train2017.zip
+    - http://images.cocodataset.org/zips/val2017.zip
+    - http://images.cocodataset.org/annotations/annotations_trainval2017.zip
+
+repro:
+  seed: 0
+  deterministic: false
+
+train_baseline:
+  out: runs/baseline
+  epochs: 300
+  batch_size: 2
+  num_workers: 8
+  lr: 1.0e-4
+  weight_decay: 1.0e-4
+  max_steps_per_epoch: null
+  device: auto
+
+tailcal:
+  epochs: 10
+  batch_size: 2
+  num_workers: 8
+  lr: 5.0e-5
+  weight_decay: 1.0e-4
+  max_steps_per_epoch: null
+
+  balanced_sampling: true
+  logit_adjustment: true
+  logit_adjustment_tau: 1.0
+  temperature_scaling: true
+
+  unfreeze_last_encoder_block: false
+  unfreeze_bbox_head: false
+
+eval:
+  split: val2017
+  batch_size: 1
+  num_workers: 4
+  score_threshold: 0.05
+  top_k: 100
+
+experiments:
+  - name: baseline
+    kind: baseline
+    out: runs/baseline
+  - name: tailcal_full
+    kind: tailcal
+    out: runs/tailcal
+    balanced_sampling: true
+    logit_adjustment: true
+    temperature_scaling: true
+    unfreeze_last_encoder_block: false
+  - name: ablate_balanced_only
+    kind: tailcal
+    out: runs/ablate_balanced_only
+    balanced_sampling: true
+    logit_adjustment: false
+    temperature_scaling: false
+    unfreeze_last_encoder_block: false
+  - name: ablate_logit_only
+    kind: tailcal
+    out: runs/ablate_logit_only
+    balanced_sampling: false
+    logit_adjustment: true
+    temperature_scaling: false
+    unfreeze_last_encoder_block: false
+  - name: ablate_temp_only
+    kind: tailcal
+    out: runs/ablate_temp_only
+    balanced_sampling: false
+    logit_adjustment: false
+    temperature_scaling: true
+    unfreeze_last_encoder_block: false
+  - name: ablate_unfreeze_transformer
+    kind: tailcal
+    out: runs/ablate_unfreeze_transformer
+    balanced_sampling: true
+    logit_adjustment: true
+    temperature_scaling: true
+    unfreeze_last_encoder_block: true

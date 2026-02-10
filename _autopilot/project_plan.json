@@ -1,0 +1,77 @@
+{
+  "repo_name": "coco-tailcal-detr",
+  "title": "TailCal-DETR: Rare-Class Accuracy + Confidence Calibration for Set-Based Object Detection on COCO",
+  "one_liner": "Train a standard DETR baseline, then add a lightweight \u201ctail-calibration\u201d fine-tuning stage (class-balanced sampling + logit-adjustment + temperature scaling) to improve rare-class AP and confidence calibration without sacrificing overall COCO mAP.",
+  "research_question": "Can a short, targeted tail-calibration stage applied after end-to-end DETR training measurably improve (1) rare-class average precision and (2) confidence calibration (ECE / risk-coverage) on COCO, while keeping overall mAP and latency essentially unchanged?",
+  "dataset": {
+    "name": "MS COCO 2017 (Detection: train2017/val2017 + annotations_trainval2017)",
+    "urls": [
+      "http://images.cocodataset.org/zips/train2017.zip",
+      "http://images.cocodataset.org/zips/val2017.zip",
+      "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
+    ],
+    "license": "COCO Dataset Terms of Use; annotations are provided for research use and images retain their original Flickr licenses/attribution requirements (consult COCO terms and per-image metadata).",
+    "approx_size_gb": 21.0,
+    "ingestion_notes": "Download via direct HTTP, unzip into data/coco/{train2017,val2017,annotations}. Use the official JSON annotations. No credentials required. Create a derived per-class frequency table from train annotations to define tail/head groups and to drive class-balanced sampling and logit-adjustment priors."
+  },
+  "method": {
+    "model": "DETR-R50 (PyTorch) trained end-to-end on COCO train2017 with standard bipartite matching; then TailCal stage: freeze backbone+transformer, fine-tune only classification head (and optionally last FFN) for a small number of epochs using class-balanced sampling, logit-adjustment with class priors, and post-hoc temperature scaling on a held-out calibration split from train.",
+    "baseline": "Vanilla DETR-R50 trained end-to-end with the same schedule, augmentation, optimizer, and evaluation pipeline; no tail calibration.",
+    "ablations": [
+      "TailCal w/ class-balanced sampling only (no logit-adjustment, no temperature scaling).",
+      "TailCal w/ logit-adjustment only (standard sampling, no temperature scaling).",
+      "TailCal w/ temperature scaling only (no class-balanced sampling, no logit-adjustment).",
+      "Unfreeze vs freeze transformer during TailCal (head-only vs head+last encoder block)."
+    ],
+    "metrics": [
+      "COCO mAP@[0.5:0.95], AP50, AP75, AP_small/AP_medium/AP_large (official COCOeval).",
+      "Per-class AP and grouped AP by frequency buckets (tail/medium/head defined from train counts).",
+      "Calibration: Expected Calibration Error (ECE) over detection confidences (after NMS), plus risk-coverage curves (selective prediction) on val2017.",
+      "Efficiency: images/sec at inference (batch=1 and batch=8) and peak VRAM."
+    ]
+  },
+  "compute": {
+    "gpus": 2,
+    "expected_hours": 18
+  },
+  "risks": [
+    "Training-time variance: DETR can be sensitive to schedule/augmentation; a too-short baseline can hide true effects.",
+    "Calibration metrics for detection require careful definition (matching predictions to GT, NMS effects); must keep evaluation consistent across runs.",
+    "COCO image licensing is heterogeneous; redistribution is not appropriate even though downloads are public.",
+    "Disk usage and unzip time are non-trivial (20+ GB compressed; more on disk uncompressed)."
+  ],
+  "execution_steps": [
+    "python3 -m venv .venv && source .venv/bin/activate",
+    "pip install -U pip wheel && pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121",
+    "pip install pycocotools opencv-python tqdm hydra-core omegaconf numpy scipy pandas faiss-cpu tensorboard",
+    "mkdir -p data/coco && cd data/coco",
+    "curl -L -o train2017.zip http://images.cocodataset.org/zips/train2017.zip && unzip -q train2017.zip",
+    "curl -L -o val2017.zip http://images.cocodataset.org/zips/val2017.zip && unzip -q val2017.zip",
+    "curl -L -o annotations_trainval2017.zip http://images.cocodataset.org/annotations/annotations_trainval2017.zip && unzip -q annotations_trainval2017.zip",
+    "cd ../../",
+    "python -m tailcal_detr.precompute_class_priors --coco_root data/coco --ann data/coco/annotations/instances_train2017.json --out artifacts/class_priors.json",
+    "torchrun --nproc_per_node=2 -m tailcal_detr.train --config configs/detr_r50_baseline.yaml --coco_root data/coco --seed 0 --out runs/baseline",
+    "python -m tailcal_detr.eval_coco --checkpoint runs/baseline/best.pt --coco_root data/coco --split val2017 --out runs/baseline/metrics.json",
+    "torchrun --nproc_per_node=2 -m tailcal_detr.train_tailcal --config configs/tailcal_head_only.yaml --init_checkpoint runs/baseline/best.pt --class_priors artifacts/class_priors.json --coco_root data/coco --seed 0 --out runs/tailcal",
+    "python -m tailcal_detr.temperature_scale --checkpoint runs/tailcal/best.pt --coco_root data/coco --calib_split calib_from_train --out runs/tailcal/temperature.json",
+    "python -m tailcal_detr.eval_coco --checkpoint runs/tailcal/best.pt --temperature runs/tailcal/temperature.json --coco_root data/coco --split val2017 --out runs/tailcal/metrics.json",
+    "python -m tailcal_detr.eval_calibration --pred runs/baseline/preds_val.json --gt data/coco/annotations/instances_val2017.json --out runs/baseline/calibration.json",
+    "python -m tailcal_detr.eval_calibration --pred runs/tailcal/preds_val.json --gt data/coco/annotations/instances_val2017.json --out runs/tailcal/calibration.json",
+    "Run ablations by repeating TailCal with configs: configs/ablate_balanced_only.yaml, configs/ablate_logit_only.yaml, configs/ablate_temp_only.yaml, configs/ablate_unfreeze_transformer.yaml; compare deltas vs baseline in a single consolidated table (scripts/compare_runs.py)."
+  ],
+  "generated_at_utc": "2026-02-10 11:11:14 UTC",
+  "hardware": {
+    "cpu_cores": 24,
+    "cpu_threads": 48,
+    "ram_gb": 251.59,
+    "gpu_count": 2,
+    "gpu_names": [
+      "NVIDIA GeForce RTX 3090",
+      "NVIDIA GeForce RTX 3090"
+    ],
+    "gpu_vram_gb": [
+      24.0,
+      24.0
+    ]
+  }
+}

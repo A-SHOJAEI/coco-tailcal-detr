@@ -1,0 +1,257 @@
+{
+  "config": {
+    "eval": {
+      "batch_size": 1,
+      "num_workers": 0,
+      "score_threshold": 0.05,
+      "split": "val",
+      "top_k": 50
+    },
+    "experiments": [
+      {
+        "kind": "baseline",
+        "name": "baseline",
+        "out": "runs/baseline_smoke"
+      },
+      {
+        "balanced_sampling": true,
+        "kind": "tailcal",
+        "logit_adjustment": true,
+        "name": "tailcal_full",
+        "out": "runs/tailcal_full_smoke",
+        "temperature_scaling": true,
+        "unfreeze_last_encoder_block": false
+      },
+      {
+        "balanced_sampling": true,
+        "kind": "tailcal",
+        "logit_adjustment": false,
+        "name": "ablate_balanced_only",
+        "out": "runs/ablate_balanced_only_smoke",
+        "temperature_scaling": false,
+        "unfreeze_last_encoder_block": false
+      },
+      {
+        "balanced_sampling": false,
+        "kind": "tailcal",
+        "logit_adjustment": true,
+        "name": "ablate_logit_only",
+        "out": "runs/ablate_logit_only_smoke",
+        "temperature_scaling": false,
+        "unfreeze_last_encoder_block": false
+      },
+      {
+        "balanced_sampling": false,
+        "kind": "tailcal",
+        "logit_adjustment": false,
+        "name": "ablate_temp_only",
+        "out": "runs/ablate_temp_only_smoke",
+        "temperature_scaling": true,
+        "unfreeze_last_encoder_block": false
+      },
+      {
+        "balanced_sampling": true,
+        "kind": "tailcal",
+        "logit_adjustment": true,
+        "name": "ablate_unfreeze_transformer",
+        "out": "runs/ablate_unfreeze_transformer_smoke",
+        "temperature_scaling": true,
+        "unfreeze_last_encoder_block": true
+      }
+    ],
+    "paths": {
+      "artifacts_dir": "artifacts",
+      "data_root": "data",
+      "runs_dir": "runs"
+    },
+    "project": {
+      "mode": "smoke",
+      "name": "coco-tailcal-detr"
+    },
+    "repro": {
+      "deterministic": true,
+      "seed": 0
+    },
+    "smoke_data": {
+      "image_size": [
+        320,
+        320
+      ],
+      "num_classes": 3,
+      "num_train_images": 8,
+      "num_val_images": 4,
+      "root": "data/smoke_coco",
+      "seed": 0
+    },
+    "tailcal": {
+      "balanced_sampling": true,
+      "batch_size": 2,
+      "epochs": 1,
+      "logit_adjustment": true,
+      "logit_adjustment_tau": 1.0,
+      "lr": 5e-05,
+      "max_steps_per_epoch": 2,
+      "num_workers": 0,
+      "temperature_scaling": true,
+      "unfreeze_bbox_head": false,
+      "unfreeze_last_encoder_block": false,
+      "weight_decay": 0.0001
+    },
+    "train_baseline": {
+      "batch_size": 2,
+      "device": "auto",
+      "epochs": 1,
+      "lr": 0.0001,
+      "max_steps_per_epoch": 3,
+      "num_workers": 0,
+      "out": "runs/baseline_smoke",
+      "weight_decay": 0.0001
+    }
+  },
+  "created_at": "2026-02-10T11:36:40Z",
+  "runs": [
+    {
+      "calibration": {
+        "aurc": 0.9558895317886269,
+        "ece": 0.2544787336885929,
+        "n": 200
+      },
+      "coco": {
+        "AP50": 0.12156215621562155,
+        "AP75": 0.0,
+        "AP_large": 0.05508550855085508,
+        "AP_medium": 0.0,
+        "AP_small": -1.0,
+        "mAP": 0.0328982898289829
+      },
+      "grouped_ap": {
+        "head": 0.0,
+        "medium": 0.02295229522952295,
+        "tail": 0.07574257425742574
+      },
+      "kind": "baseline",
+      "name": "baseline",
+      "run_dir": "runs/baseline_smoke"
+    },
+    {
+      "calibration": {
+        "aurc": 0.7240234591797093,
+        "ece": 0.04719109623692929,
+        "n": 16
+      },
+      "coco": {
+        "AP50": 0.14026402640264027,
+        "AP75": 0.0,
+        "AP_large": 0.06311881188118812,
+        "AP_medium": 0.0,
+        "AP_small": -1.0,
+        "mAP": 0.03646864686468647
+      },
+      "grouped_ap": {
+        "head": 0.0,
+        "medium": 0.033663366336633666,
+        "tail": 0.07574257425742574
+      },
+      "kind": "tailcal",
+      "name": "tailcal_full",
+      "run_dir": "runs/tailcal_full_smoke",
+      "temperature": 0.30886532332146344
+    },
+    {
+      "calibration": {
+        "aurc": 0.9558895317886269,
+        "ece": 0.25200786363333466,
+        "n": 200
+      },
+      "coco": {
+        "AP50": 0.12156215621562155,
+        "AP75": 0.0,
+        "AP_large": 0.05508550855085508,
+        "AP_medium": 0.0,
+        "AP_small": -1.0,
+        "mAP": 0.0328982898289829
+      },
+      "grouped_ap": {
+        "head": 0.0,
+        "medium": 0.02295229522952295,
+        "tail": 0.07574257425742574
+      },
+      "kind": "tailcal",
+      "name": "ablate_balanced_only",
+      "run_dir": "runs/ablate_balanced_only_smoke"
+    },
+    {
+      "calibration": {
+        "aurc": 0.9511141446905476,
+        "ece": 0.13755457112953687,
+        "n": 192
+      },
+      "coco": {
+        "AP50": 0.14026402640264027,
+        "AP75": 0.0,
+        "AP_large": 0.06350135013501348,
+        "AP_medium": 0.0,
+        "AP_small": -1.0,
+        "mAP": 0.03663866386638664
+      },
+      "grouped_ap": {
+        "head": 0.0,
+        "medium": 0.03417341734173417,
+        "tail": 0.07574257425742574
+      },
+      "kind": "tailcal",
+      "name": "ablate_logit_only",
+      "run_dir": "runs/ablate_logit_only_smoke"
+    },
+    {
+      "calibration": {
+        "aurc": 0.7891744469840446,
+        "ece": 0.13342855535447598,
+        "n": 20
+      },
+      "coco": {
+        "AP50": 0.12156215621562155,
+        "AP75": 0.0,
+        "AP_large": 0.0547029702970297,
+        "AP_medium": 0.0,
+        "AP_small": -1.0,
+        "mAP": 0.032728272827282724
+      },
+      "grouped_ap": {
+        "head": 0.0,
+        "medium": 0.02244224422442244,
+        "tail": 0.07574257425742574
+      },
+      "kind": "tailcal",
+      "name": "ablate_temp_only",
+      "run_dir": "runs/ablate_temp_only_smoke",
+      "temperature": 0.1473576248519835
+    },
+    {
+      "calibration": {
+        "aurc": 0.7240234591797093,
+        "ece": 0.056991207879036665,
+        "n": 16
+      },
+      "coco": {
+        "AP50": 0.14026402640264027,
+        "AP75": 0.0,
+        "AP_large": 0.06311881188118812,
+        "AP_medium": 0.0,
+        "AP_small": -1.0,
+        "mAP": 0.03646864686468647
+      },
+      "grouped_ap": {
+        "head": 0.0,
+        "medium": 0.033663366336633666,
+        "tail": 0.07574257425742574
+      },
+      "kind": "tailcal",
+      "name": "ablate_unfreeze_transformer",
+      "run_dir": "runs/ablate_unfreeze_transformer_smoke",
+      "temperature": 0.34611322115114446
+    }
+  ],
+  "_autopilot_runtime_seconds": 15.09,
+  "_autopilot_ran_at_utc": "2026-02-10 11:36:40 UTC"
+}

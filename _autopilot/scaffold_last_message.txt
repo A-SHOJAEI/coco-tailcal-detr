@@ -1,0 +1,20 @@
+Implemented a standalone repo in `/home/alireza/research-autopilot/generated_projects/coco-tailcal-detr` based on `_autopilot/project_plan.json`, with:
+
+- Data download + checksum manifest verification: `tailcal_detr/data/download_coco.py` (SHA256 manifest in `data/coco/downloads/manifest.sha256.json`)
+- PyTorch training with reproducibility controls (seed + deterministic flags + worker seeding): `tailcal_detr/repro.py`, `tailcal_detr/train.py`, `tailcal_detr/train_tailcal.py`
+- Baseline + TailCal + ablations from the plan (balanced-only, logit-only, temp-only, unfreeze-transformer) via `configs/full.yaml` and `configs/smoke.yaml` plus plan-named configs in `configs/*.yaml`
+- Evaluation producing per-run outputs and consolidated artifacts:
+  - Per-run: `runs/*/metrics_coco.json`, `runs/*/preds_val.json`, `runs/*/calibration.json`
+  - Consolidated: `artifacts/results.json`, `artifacts/report.md` via `tailcal_detr/pipeline.py`
+- Makefile targets: `setup`, `data`, `train`, `eval`, `report`, `all` (default uses fast smoke config)
+- PEP 668-safe venv bootstrap that does not rely on `ensurepip`: `scripts/bootstrap_venv.sh` uses `python3 -m venv --without-pip .venv` + downloaded `get-pip.py`
+
+Run (smoke, fast):
+```bash
+make all
+```
+
+Run full COCO pipeline:
+```bash
+make all CONFIG=configs/full.yaml
+```
