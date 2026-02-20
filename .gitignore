@@ -5,9 +5,9 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 
-data/
-runs/
-artifacts/
+/data/
+/runs/
+/artifacts/
 
 *.pt
 *.pth
