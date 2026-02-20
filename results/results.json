@@ -1,0 +1,255 @@
+{
+  "config": {
+    "eval": {
+      "batch_size": 1,
+      "num_workers": 0,
+      "score_threshold": 0.05,
+      "split": "val",
+      "top_k": 50
+    },
+    "experiments": [
+      {
+        "kind": "baseline",
+        "name": "baseline",
+        "out": "runs/baseline_smoke"
+      },
+      {
+        "balanced_sampling": true,
+        "kind": "tailcal",
+        "logit_adjustment": true,
+        "name": "tailcal_full",
+        "out": "runs/tailcal_full_smoke",
+        "temperature_scaling": true,
+        "unfreeze_last_encoder_block": false
+      },
+      {
+        "balanced_sampling": true,
+        "kind": "tailcal",
+        "logit_adjustment": false,
+        "name": "ablate_balanced_only",
+        "out": "runs/ablate_balanced_only_smoke",
+        "temperature_scaling": false,
+        "unfreeze_last_encoder_block": false
+      },
+      {
+        "balanced_sampling": false,
+        "kind": "tailcal",
+        "logit_adjustment": true,
+        "name": "ablate_logit_only",
+        "out": "runs/ablate_logit_only_smoke",
+        "temperature_scaling": false,
+        "unfreeze_last_encoder_block": false
+      },
+      {
+        "balanced_sampling": false,
+        "kind": "tailcal",
+        "logit_adjustment": false,
+        "name": "ablate_temp_only",
+        "out": "runs/ablate_temp_only_smoke",
+        "temperature_scaling": true,
+        "unfreeze_last_encoder_block": false
+      },
+      {
+        "balanced_sampling": true,
+        "kind": "tailcal",
+        "logit_adjustment": true,
+        "name": "ablate_unfreeze_transformer",
+        "out": "runs/ablate_unfreeze_transformer_smoke",
+        "temperature_scaling": true,
+        "unfreeze_last_encoder_block": true
+      }
+    ],
+    "paths": {
+      "artifacts_dir": "artifacts",
+      "data_root": "data",
+      "runs_dir": "runs"
+    },
+    "project": {
+      "mode": "smoke",
+      "name": "coco-tailcal-detr"
+    },
+    "repro": {
+      "deterministic": true,
+      "seed": 0
+    },
+    "smoke_data": {
+      "image_size": [
+        320,
+        320
+      ],
+      "num_classes": 3,
+      "num_train_images": 8,
+      "num_val_images": 4,
+      "root": "data/smoke_coco",
+      "seed": 0
+    },
+    "tailcal": {
+      "balanced_sampling": true,
+      "batch_size": 2,
+      "epochs": 1,
+      "logit_adjustment": true,
+      "logit_adjustment_tau": 1.0,
+      "lr": 5e-05,
+      "max_steps_per_epoch": 2,
+      "num_workers": 0,
+      "temperature_scaling": true,
+      "unfreeze_bbox_head": false,
+      "unfreeze_last_encoder_block": false,
+      "weight_decay": 0.0001
+    },
+    "train_baseline": {
+      "batch_size": 2,
+      "device": "auto",
+      "epochs": 1,
+      "lr": 0.0001,
+      "max_steps_per_epoch": 3,
+      "num_workers": 0,
+      "out": "runs/baseline_smoke",
+      "weight_decay": 0.0001
+    }
+  },
+  "created_at": "2026-02-20T06:07:34Z",
+  "runs": [
+    {
+      "calibration": {
+        "aurc": 0.995,
+        "ece": 0.2842958403378725,
+        "n": 200
+      },
+      "coco": {
+        "AP50": 0.0,
+        "AP75": 0.0,
+        "AP_large": -1.0,
+        "AP_medium": 0.0,
+        "AP_small": 0.0,
+        "mAP": 0.0
+      },
+      "grouped_ap": {
+        "head": 0.0,
+        "medium": 0.0,
+        "tail": 0.0
+      },
+      "kind": "baseline",
+      "name": "baseline",
+      "run_dir": "runs/baseline_smoke"
+    },
+    {
+      "calibration": {
+        "aurc": NaN,
+        "ece": NaN,
+        "n": 0
+      },
+      "coco": {
+        "AP50": NaN,
+        "AP75": NaN,
+        "AP_large": NaN,
+        "AP_medium": NaN,
+        "AP_small": NaN,
+        "mAP": NaN
+      },
+      "grouped_ap": {
+        "head": NaN,
+        "medium": NaN,
+        "tail": NaN
+      },
+      "kind": "tailcal",
+      "name": "tailcal_full",
+      "run_dir": "runs/tailcal_full_smoke",
+      "temperature": 0.05064720309967558
+    },
+    {
+      "calibration": {
+        "aurc": 0.995,
+        "ece": 0.2818931870907545,
+        "n": 200
+      },
+      "coco": {
+        "AP50": 0.0,
+        "AP75": 0.0,
+        "AP_large": -1.0,
+        "AP_medium": 0.0,
+        "AP_small": 0.0,
+        "mAP": 0.0
+      },
+      "grouped_ap": {
+        "head": 0.0,
+        "medium": 0.0,
+        "tail": 0.0
+      },
+      "kind": "tailcal",
+      "name": "ablate_balanced_only",
+      "run_dir": "runs/ablate_balanced_only_smoke"
+    },
+    {
+      "calibration": {
+        "aurc": 0.9946808510638299,
+        "ece": 0.15580743678072667,
+        "n": 188
+      },
+      "coco": {
+        "AP50": 0.0,
+        "AP75": 0.0,
+        "AP_large": -1.0,
+        "AP_medium": 0.0,
+        "AP_small": 0.0,
+        "mAP": 0.0
+      },
+      "grouped_ap": {
+        "head": 0.0,
+        "medium": 0.0,
+        "tail": 0.0
+      },
+      "kind": "tailcal",
+      "name": "ablate_logit_only",
+      "run_dir": "runs/ablate_logit_only_smoke"
+    },
+    {
+      "calibration": {
+        "aurc": 0.9166666666666667,
+        "ece": 0.47135524079203606,
+        "n": 12
+      },
+      "coco": {
+        "AP50": 0.0,
+        "AP75": 0.0,
+        "AP_large": -1.0,
+        "AP_medium": 0.0,
+        "AP_small": 0.0,
+        "mAP": 0.0
+      },
+      "grouped_ap": {
+        "head": 0.0,
+        "medium": 0.0,
+        "tail": 0.0
+      },
+      "kind": "tailcal",
+      "name": "ablate_temp_only",
+      "run_dir": "runs/ablate_temp_only_smoke",
+      "temperature": 0.08811460344100829
+    },
+    {
+      "calibration": {
+        "aurc": NaN,
+        "ece": NaN,
+        "n": 0
+      },
+      "coco": {
+        "AP50": NaN,
+        "AP75": NaN,
+        "AP_large": NaN,
+        "AP_medium": NaN,
+        "AP_small": NaN,
+        "mAP": NaN
+      },
+      "grouped_ap": {
+        "head": NaN,
+        "medium": NaN,
+        "tail": NaN
+      },
+      "kind": "tailcal",
+      "name": "ablate_unfreeze_transformer",
+      "run_dir": "runs/ablate_unfreeze_transformer_smoke",
+      "temperature": 0.05063910717649317
+    }
+  ]
+}
